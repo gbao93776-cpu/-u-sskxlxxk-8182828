@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#05050a">
+<title>AimLock Gia Bao</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+:root{--bg:#05050a;--panel:rgba(15,16,26,.72);--line:rgba(255,255,255,.08);--cyan:#00f3ff;--purple:#b000ff;--green:#00ff66;--red:#ff0055;--text:#f1f5f9;--dim:#64748b}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#bg{position:fixed;inset:0;z-index:-1;background-image:url('nen.png');background-size:cover;background-position:center;background-repeat:no-repeat}
+#bg::before{content:"";position:absolute;inset:0;background:rgba(5,6,10,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.screen{position:fixed;inset:0;z-index:2;display:none}
+#login{align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+#app{flex-direction:column;justify-content:center}
+.login-card{width:100%;max-width:390px;background:var(--panel);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:24px;padding:32px 22px;box-shadow:0 20px 50px -10px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);position:relative;text-align:center}
+.login-card::before{content:"";position:absolute;top:0;left:15%;right:15%;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.logo-box{width:88px;height:88px;margin:0 auto 20px;position:relative;display:grid;place-items:center}
+.logo-box img{width:100%;height:100%;object-fit:cover;border-radius:22px;box-shadow:0 0 25px rgba(0,243,255,.4);border:1px solid rgba(0,243,255,.3)}
+.logo-box::after{content:"";position:absolute;inset:-8px;border-radius:28px;border:1px dashed rgba(0,243,255,.3);animation:spin 12s linear infinite}
+@keyframes spin{100%{transform:rotate(360deg)}}
+.login-card h1{font-size:26px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;background:linear-gradient(90deg,#fff,var(--cyan));-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(0,243,255,.4))}
+.login-card p.sub{font-size:12.5px;color:var(--dim);margin-bottom:26px;letter-spacing:.06em}
+.input-group{position:relative;margin-bottom:16px;text-align:left}
+.input-group input{width:100%;height:54px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:14px;padding:0 64px 0 16px;outline:none;transition:.3s;letter-spacing:.04em}
+.input-group input::placeholder{color:rgba(255,255,255,.2);font-family:'Outfit',sans-serif;letter-spacing:0}
+.input-group input:focus{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,243,255,.2);background:rgba(0,0,0,.75)}
+.btn-paste{position:absolute;right:7px;top:7px;height:40px;padding:0 15px;background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.3);border-radius:10px;color:var(--cyan);font-family:'Outfit';font-weight:700;font-size:12px;letter-spacing:.05em;cursor:pointer;transition:.2s}
+.btn-paste:active{transform:scale(.95);background:rgba(0,243,255,.2)}
+.btn-login{width:100%;height:54px;background:linear-gradient(135deg,var(--cyan),var(--purple));border:0;border-radius:14px;color:#000;font-size:15px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 12px 30px -8px rgba(0,243,255,.5);transition:.2s}
+.btn-login:active{transform:scale(.97)}
+.btn-login:disabled{opacity:.5;cursor:not-allowed}
+.msg{font-size:13px;margin-top:16px;min-height:18px;color:var(--red);font-weight:600}
+.msg.ok{color:var(--green)}
+.hwid-box{margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--dim);background:rgba(255,255,255,.03);padding:8px 14px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.05)}
+.hwid-box::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.app-shell{width:100%;max-width:520px;margin:0 auto;height:100%;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));overflow:hidden}
+.app-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0}
+.head-left{display:flex;align-items:center;gap:11px}
+.avatar{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(145deg,rgba(0,243,255,.2),rgba(176,0,255,.2));border:1px solid rgba(0,243,255,.3)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.head-title{font-size:15px;font-weight:800;letter-spacing:.08em}
+.head-sub{font-size:11px;color:var(--cyan);margin-top:2px;font-family:'JetBrains Mono',monospace}
+.logout{height:34px;padding:0 14px;border-radius:10px;background:rgba(255,0,85,.1);border:1px solid rgba(255,0,85,.3);color:var(--red);font-size:11.5px;font-weight:700;letter-spacing:.05em;cursor:pointer;font-family:inherit}
+.logout:active{transform:scale(.95)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:6px;margin-bottom:16px;flex-shrink:0}
+.tab{height:40px;border:0;border-radius:11px;background:transparent;color:var(--dim);font-size:13px;font-weight:700;letter-spacing:.04em;cursor:pointer;font-family:inherit;transition:.25s}
+.tab.active{color:#000;background:linear-gradient(100deg,var(--cyan),var(--purple));box-shadow:0 6px 18px -8px rgba(0,243,255,.8)}
+.app-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:16px;scrollbar-width:none;min-height:0}
+.app-body::-webkit-scrollbar{display:none}
+.panel{display:none}
+.panel.active{display:block}
+.section-title{font-size:10.5px;letter-spacing:.15em;color:#5f647a;font-weight:700;margin:4px 2px 10px;text-transform:uppercase}
+.card-group{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:18px;box-shadow:0 10px 30px -15px rgba(0,0,0,.8)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 15px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .2s}
+.row:last-child{border-bottom:0}
+.row:active{background:rgba(255,255,255,.02)}
+.rt{font-size:13.5px;font-weight:600}
+.rs{font-size:11px;color:var(--dim);margin-top:3px}
+.switch{position:relative;flex:0 0 auto;width:50px;height:30px;border-radius:999px;padding:0;background:rgba(255,255,255,.08);border:1px solid var(--line);cursor:pointer;transition:.3s}
+.switch span{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#6b7089;transition:left .3s cubic-bezier(.3,1.5,.5,1),background .3s;box-shadow:0 2px 5px rgba(0,0,0,.4)}
+.switch.on{background:rgba(0,243,255,.2);border-color:var(--cyan);box-shadow:0 0 15px rgba(0,243,255,.3)}
+.switch.on span{left:calc(100% - 25px);background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.game-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.game-btn{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 10px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:.2s;font-family:inherit;color:var(--dim)}
+.game-btn svg{width:30px;height:30px;stroke:var(--dim);fill:none;stroke-width:1.8;transition:.2s}
+.game-btn span{font-size:13px;font-weight:700}
+.game-btn.active{border-color:var(--purple);background:linear-gradient(180deg,rgba(176,0,255,.1),transparent);box-shadow:0 0 20px rgba(176,0,255,.2)}
+.game-btn.active svg{stroke:var(--purple);filter:drop-shadow(0 0 6px var(--purple))}
+.game-btn.active span{color:#fff}
+.btn-launch{display:none;width:100%;height:56px;border-radius:14px;background:linear-gradient(135deg,var(--green),#00b33c);border:0;color:#000;font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;box-shadow:0 12px 30px -8px rgba(0,255,102,.4);transition:.2s;font-family:inherit;margin-bottom:16px}
+.btn-launch.show{display:block}
+.btn-launch:active{transform:scale(.97)}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat-label{font-size:10px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.stat-value{font-size:22px;font-weight:800;margin-top:6px;font-family:'JetBrains Mono',monospace;background:linear-gradient(100deg,#fff,#b78cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-bar{height:4px;background:rgba(255,255,255,.06);border-radius:99px;margin-top:10px;overflow:hidden}
+.stat-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .5s}
+.dev{display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid rgba(255,255,255,.04)}
+.dev:last-child{border-bottom:0}
+.dev-avatar{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:15px;color:#000;background:linear-gradient(140deg,#b78cff,#22d3ee);flex:0 0 auto}
+.dev-name{font-size:13.5px;font-weight:700}
+.dev-zl{font-size:11.5px;color:var(--dim);margin-top:3px}
+.dev-zl b{color:#9d8bff;font-weight:700}
+.ver-card{background:linear-gradient(140deg,rgba(124,92,255,.16),rgba(34,211,238,.06));border:1px solid rgba(124,92,255,.28);border-radius:16px;padding:16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.ver-card .vt{font-size:14px;font-weight:800;letter-spacing:.06em}
+.ver-card .vs{font-size:11px;color:var(--dim);margin-top:4px}
+.badge{font-size:10px;font-weight:800;letter-spacing:.1em;padding:6px 11px;border-radius:99px;background:rgba(46,230,168,.13);border:1px solid rgba(46,230,168,.3);color:var(--green)}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+
+<section id="login" class="screen" style="display:flex">
+  <div class="login-card">
+    <div class="logo-box"><img src="logo.png" alt="" onerror="this.style.display='none'"></div>
+    <h1>AimLock Gia Bao</h1>
+    <p class="sub">Nhập key để kích hoạt hệ thống</p>
+    <div class="input-group">
+      <input id="keyInput" type="text" placeholder="nexoz-xxx-xxx" spellcheck="false" autocomplete="off" autocapitalize="off">
+      <button id="pasteBtn" class="btn-paste">DÁN</button>
+    </div>
+    <button id="loginBtn" class="btn-login">KÍCH HOẠT</button>
+    <p id="loginMsg" class="msg"></p>
+    <div class="hwid-box" id="deviceIdText">DEVICE: LOADING...</div>
+  </div>
+</section>
+
+<section id="app" class="screen">
+  <div class="app-shell">
+    <header class="app-head">
+      <div class="head-left">
+        <div class="avatar"><img src="logo.png" alt="" onerror="this.style.display='none'"></div>
+        <div>
+          <div class="head-title">AIMLOCK Gia Bao</div>
+          <div class="head-sub" id="keyInfo">--</div>
+        </div>
+      </div>
+      <button id="logoutBtn" class="logout">THOÁT</button>
+    </header>
+    <nav class="tabs">
+      <button class="tab active" data-tab="p1">Chức Năng</button>
+      <button class="tab" data-tab="p2">Hệ Thống</button>
+      <button class="tab" data-tab="p3">Version</button>
+    </nav>
+    <main class="app-body">
+      <div id="p1" class="panel active">
+        <div class="section-title">Memory Patches</div>
+        <div class="card-group">
+          <div class="row"><div><div class="rt">Bypass Anti-Cheat</div><div class="rs">Vô hiệu hóa quét bộ nhớ</div></div><button class="switch" data-k="antiban"><span></span></button></div>
+          <div class="row"><div><div class="rt">AimLock Core</div><div class="rs">Khóa mục tiêu tự động</div></div><button class="switch" data-k="aimlock"><span></span></button></div>
+          <div class="row"><div><div class="rt">Silent Aim</div><div class="rs">Giảm độ trễ kéo tâm</div></div><button class="switch" data-k="nhetam"><span></span></button></div>
+          <div class="row"><div><div class="rt">Head Tracking</div><div class="rs">Ưu tiên khóa tọa độ đầu</div></div><button class="switch" data-k="bamda"><span></span></button></div>
+          <div class="row"><div><div class="rt">FPS Unlocker</div><div class="rs">Ép xung 120FPS</div></div><button class="switch" data-k="buff120"><span></span></button></div>
+          <div class="row"><div><div class="rt">Fix Lố</div><div class="rs">Sửa lỗi giật tâm</div></div><button class="switch" data-k="fixlo"><span></span></button></div>
+          <div class="row"><div><div class="rt">Fix Rung</div><div class="rs">Triệt tiêu độ giật súng</div></div><button class="switch" data-k="fixrung"><span></span></button></div>
+        </div>
+        <div class="section-title">Game Target</div>
+        <div class="game-grid">
+          <button class="game-btn active" data-game="ff" data-scheme="freefire://">
+            <svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            <span>Free Fire</span>
+          </button>
+          <button class="game-btn" data-game="ffmax" data-scheme="freefiremax://">
+            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <span>FF Max</span>
+          </button>
+        </div>
+        <button id="launchBtn" class="btn-launch">VÀO GAME NGAY</button>
+      </div>
+      <div id="p2" class="panel">
+        <div class="section-title">Tình Trạng Máy</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">FPS</div><div class="stat-value" id="sFps">--</div><div class="stat-bar"><i id="bFps"></i></div></div>
+          <div class="stat-card"><div class="stat-label">CPU</div><div class="stat-value" id="sCpu">--</div><div class="stat-bar"><i id="bCpu"></i></div></div>
+          <div class="stat-card"><div class="stat-label">Network</div><div class="stat-value" id="sNet">--</div><div class="stat-bar"><i id="bNet"></i></div></div>
+          <div class="stat-card"><div class="stat-label">Nhiệt độ</div><div class="stat-value" id="sTemp">--</div><div class="stat-bar"><i id="bTemp"></i></div></div>
+        </div>
+      </div>
+      <div id="p3" class="panel">
+        <div class="ver-card"><div><div class="vt">AIMLOCK NDN</div><div class="vs">Phiên bản 2.3.0 · Build 2026</div></div><div class="badge">LATEST</div></div>
+        <div class="section-title">Nhà Phát Triển</div>
+        <div class="card-group">
+          <div class="dev"><div class="dev-avatar">N</div><div><div class="dev-name">Gia Bao</div><div class="dev-zl">Telegram: <b>@HinhaNexoz</b></div></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<script>
+"use strict";
+
+const CFG = {
+  maxFails: 5, lockMs: 2 * 60 * 1000,
+  kSession: "ndn_session_v6", kFails: "ndn_fails_v6",
+  kLock: "ndn_lock_v6", kToggles: "ndn_toggles_v6"
+};
+const PING_INTERVAL = 15000;
+// Endpoint phải được deploy cùng origin hoặc có HTTPS/CORS phù hợp.
+const KEY_API_ENDPOINT = "http://78.154.103.13:16831/api/validate_key";
+
+async function checkKeyApi(raw) {
+  const response = await fetch(KEY_API_ENDPOINT, {
+    method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify({ key: raw, deviceId: myDeviceId, service: "panel" }),
+    signal: AbortSignal.timeout(8000)
+  });
+  const result = await response.json();
+  if (!response.ok || typeof result.valid !== "boolean") {
+    throw new Error(result.message || "API xác thực trả về dữ liệu không hợp lệ");
+  }
+  return result;
+}
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+function getDeviceFingerprint() {
+  const str = navigator.userAgent + screen.width + "x" + screen.height + navigator.language;
+  let h1 = 0x811c9dc5, h2 = 0x9e3779b9;
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charCodeAt(i);
+    h1 ^= c; h1 = Math.imul(h1, 16777619) >>> 0;
+    h2 = (h2 ^ c) >>> 0; h2 = Math.imul(h2, 2246822519) >>> 0;
+  }
+  return "DEV-" + h1.toString(36).toUpperCase() + h2.toString(36).toUpperCase().slice(0, 4);
+}
+const myDeviceId = getDeviceFingerprint();
+document.getElementById("deviceIdText").textContent = "DEVICE: " + myDeviceId;
+
+function verifyKey(raw) {
+  const key = (raw || "").trim();
+  return /^nexoz-[a-z0-9]{3}-[a-z0-9]{3}$/i.test(key)
+    ? { ok: true } : { ok: false, r: "Sai định dạng key Store (nexoz-xxx-xxx)" };
+}
+
+let actx = null;
+function beep(on) {
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+    const t = actx.currentTime;
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(on ? 800 : 400, t);
+    o.frequency.exponentialRampToValueAtTime(on ? 1200 : 200, t + 0.08);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.1, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + 0.12);
+  } catch (e) {}
+}
+function buzz(ms) { if (navigator.vibrate) try { navigator.vibrate(ms); } catch (e) {} }
+
+function fmtRemain(ms) {
+  if (!ms || ms < 0) return "0s";
+  const d = Math.floor(ms / 864e5);
+  const h = Math.floor((ms % 864e5) / 36e5);
+  const m = Math.floor((ms % 36e5) / 6e4);
+  const s = Math.floor((ms % 6e4) / 1e3);
+  if (d) return d + "d " + h + "h " + m + "m";
+  if (h) return h + "h " + m + "m " + s + "s";
+  if (m) return m + "m " + s + "s";
+  return s + "s";
+}
+
+const elLogin = $("#login"), elApp = $("#app");
+const elInput = $("#keyInput"), elMsg = $("#loginMsg"), elLoginBtn = $("#loginBtn");
+
+function setMsg(t, ok) { elMsg.textContent = t || ""; elMsg.classList.toggle("ok", !!ok); }
+function getFails() { return parseInt(localStorage.getItem(CFG.kFails) || "0", 10) || 0; }
+function setFails(n) { localStorage.setItem(CFG.kFails, String(n)); }
+function getLockUntil() { return parseInt(localStorage.getItem(CFG.kLock) || "0", 10) || 0; }
+
+let lockTimer = null;
+function renderLock() {
+  const left = getLockUntil() - Date.now();
+  if (left > 0) {
+    elLoginBtn.disabled = true;
+    setMsg("Sai quá " + CFG.maxFails + " lần. Thử lại sau " + Math.ceil(left / 1000) + "s");
+    if (!lockTimer) {
+      lockTimer = setInterval(() => {
+        const l = getLockUntil() - Date.now();
+        if (l > 0) setMsg("Sai quá " + CFG.maxFails + " lần. Thử lại sau " + Math.ceil(l / 1000) + "s");
+        else { clearInterval(lockTimer); lockTimer = null; elLoginBtn.disabled = false; setMsg(""); }
+      }, 500);
+    }
+    return true;
+  }
+  elLoginBtn.disabled = false;
+  return false;
+}
+
+function showApp() { elLogin.style.display = "none"; elApp.style.display = "flex"; }
+function showLogin() {
+  elApp.style.display = "none";
+  elLogin.style.display = "flex";
+  elInput.value = "";
+  elLoginBtn.disabled = false;
+  setMsg("");
+}
+
+let currentSession = null;
+
+function killSession() {
+  const s = currentSession;
+  if (!s) return;
+  s.closed = true; clearInterval(s.timer); clearInterval(s.pingTimer);
+  try { document.removeEventListener("visibilitychange", s.onVis); } catch (e) {}
+  currentSession = null;
+}
+
+function startSession(key, durationSeconds, activatedAt) {
+  killSession();
+  const s = { key, duration: durationSeconds < 0 ? 0 : durationSeconds * 1000,
+    activatedAt: activatedAt || Date.now(), closed: false, timer: null, pingTimer: null, onVis: null };
+  currentSession = s;
+  const info = $("#keyInfo");
+  function render() {
+    if (s.closed) return;
+    if (s.duration > 0) {
+      const remain = s.activatedAt + s.duration - Date.now();
+      if (remain <= 0) { setTimeout(() => forceLogout("Key đã hết thời gian sử dụng"), 0); return; }
+      info.textContent = "Còn " + fmtRemain(remain);
+    } else info.textContent = "Vĩnh viễn";
+  }
+  render(); s.timer = setInterval(render, 1000);
+  // Revalidate against server periodically so revoked/expired keys are logged out.
+  s.pingTimer = setInterval(async () => {
+    if (s.closed) return;
+    try { const r = await checkKeyApi(s.key); if (!r.valid) forceLogout(r.message || "Key không còn hợp lệ"); }
+    catch (e) { console.warn("Không thể xác thực lại key:", e); }
+  }, PING_INTERVAL);
+  s.onVis = async function () {
+    if (s.closed || document.hidden) return;
+    try { const r = await checkKeyApi(s.key); if (!r.valid) forceLogout(r.message || "Key không còn hợp lệ"); }
+    catch (e) { console.warn("Không thể xác thực lại key:", e); }
+  };
+  document.addEventListener("visibilitychange", s.onVis);
+}
+
+function forceLogout(reason) {
+  killSession(); localStorage.removeItem(CFG.kSession); showLogin();
+  if (reason) setMsg(reason, false); buzz(200);
+}
+
+async function doLogin() {
+  if (renderLock()) return;
+  const raw = (elInput.value || "").trim();
+  if (!raw) { setMsg("Vui lòng nhập key"); return; }
+  const v = verifyKey(raw);
+  if (!v.ok) { failAndCount(v.r); return; }
+  elLoginBtn.disabled = true; setMsg("Đang xác thực...", true);
+  try {
+    const result = await checkKeyApi(raw);
+    if (!result.valid) { failAndCount(result.message || "Key không hợp lệ"); return; }
+    setFails(0);
+    const activatedAt = Number(result.activatedAt) || Date.now();
+    const durationSeconds = Number(result.durationSeconds);
+    localStorage.setItem(CFG.kSession, JSON.stringify({ key: raw, device: myDeviceId, at: Date.now() }));
+    beep(true); elLoginBtn.disabled = false; showApp();
+    startSession(raw, Number.isFinite(durationSeconds) ? durationSeconds : 0, activatedAt);
+  } catch (err) {
+    console.error(err);
+    setMsg("Không kết nối được API key. Kiểm tra máy chủ và HTTPS/CORS.");
+    elLoginBtn.disabled = false;
+  }
+}
+
+function failAndCount(msg) {
+  const fails = getFails() + 1;
+  setFails(fails);
+  if (fails >= CFG.maxFails) {
+    localStorage.setItem(CFG.kLock, String(Date.now() + CFG.lockMs));
+    setFails(0);
+    renderLock();
+  } else {
+    setMsg(msg + " (" + (CFG.maxFails - fails) + " lần thử còn lại)", false);
+    elLoginBtn.disabled = false;
+  }
+  buzz(120);
+}
+
+async function restoreSession() {
+  const saved = localStorage.getItem(CFG.kSession);
+  if (!saved) return false;
+  let s; try { s = JSON.parse(saved); } catch (e) { return false; }
+  if (!s || !s.key || s.device !== myDeviceId) return false;
+  try {
+    const result = await checkKeyApi(s.key);
+    if (!result.valid) { localStorage.removeItem(CFG.kSession); return false; }
+    showApp();
+    startSession(s.key, Number(result.durationSeconds) || 0, Number(result.activatedAt) || Date.now());
+    return true;
+  } catch (e) { console.error(e); return false; }
+}
+
+$("#pasteBtn").addEventListener("click", async () => {
+  try {
+    const txt = await navigator.clipboard.readText();
+    elInput.value = (txt || "").trim();
+    elInput.focus();
+  } catch (e) { elInput.focus(); }
+});
+
+elLoginBtn.addEventListener("click", doLogin);
+elInput.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+
+$("#logoutBtn").addEventListener("click", () => {
+  if (!confirm("Bạn có chắc muốn đăng xuất?")) return;
+  killSession();
+  localStorage.removeItem(CFG.kSession);
+  showLogin();
+  setMsg("Đã đăng xuất", true);
+});
+
+$$(".tab").forEach(tab => tab.addEventListener("click", () => {
+  $$(".tab").forEach(t => t.classList.remove("active"));
+  tab.classList.add("active");
+  $$(".panel").forEach(p => p.classList.remove("active"));
+  const p = document.getElementById(tab.dataset.tab);
+  if (p) p.classList.add("active");
+}));
+
+(function initToggles() {
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(CFG.kToggles) || "{}"); } catch (e) {}
+  $$(".switch").forEach(sw => {
+    const k = sw.dataset.k;
+    if (saved[k]) sw.classList.add("on");
+    sw.addEventListener("click", () => {
+      sw.classList.toggle("on");
+      const on = sw.classList.contains("on");
+      let o = {};
+      try { o = JSON.parse(localStorage.getItem(CFG.kToggles) || "{}"); } catch (e) {}
+      o[k] = on;
+      localStorage.setItem(CFG.kToggles, JSON.stringify(o));
+      beep(on); buzz(20);
+    });
+  });
+})();
+
+let selectedGame = null;
+$$(".game-btn").forEach(btn => btn.addEventListener("click", () => {
+  $$(".game-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  selectedGame = btn;
+  $("#launchBtn").classList.add("show");
+}));
+
+$("#launchBtn").addEventListener("click", () => {
+  if (!selectedGame) return;
+  const scheme = selectedGame.dataset.scheme;
+  if (!scheme) return;
+  buzz(50);
+  try { window.location.href = scheme; }
+  catch (e) {
+    const a = document.createElement("a");
+    a.href = scheme;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+});
+
+(function initStats() {
+  function updateStat(vId, bId, text, value, max) {
+    const v = document.getElementById(vId);
+    const b = document.getElementById(bId);
+    if (v) v.textContent = text;
+    if (b) b.style.width = Math.max(0, Math.min(100, (value / max) * 100)) + "%";
+  }
+  let frames = 0, lastT = performance.now();
+  (function tickFps() {
+    frames++;
+    const now = performance.now();
+    if (now - lastT >= 1000) {
+      const fps = Math.round((frames * 1000) / (now - lastT));
+      updateStat("sFps", "bFps", fps + " FPS", fps, 120);
+      frames = 0; lastT = now;
+    }
+    requestAnimationFrame(tickFps);
+  })();
+  setInterval(() => {
+    const cpu = 15 + Math.floor(Math.random() * 45);
+    const net = 20 + Math.floor(Math.random() * 80);
+    const temp = 32 + Math.floor(Math.random() * 18);
+    updateStat("sCpu", "bCpu", cpu + "%", cpu, 100);
+    updateStat("sNet", "bNet", net + "ms", net, 200);
+    updateStat("sTemp", "bTemp", temp + "°C", temp, 60);
+  }, 2000);
+})();
+
+(async () => {
+  renderLock();
+  const ok = await restoreSession();
+  if (!ok) showLogin();
+})();
+</script>
+</body>
+</html>

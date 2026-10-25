@@ -181,7 +181,7 @@ const CFG = {
 };
 const PING_INTERVAL = 15000;
 // Endpoint phải được deploy cùng origin hoặc có HTTPS/CORS phù hợp.
-const KEY_API_ENDPOINT = "http://78.154.103.13:16831/api/validate_key";
+const KEY_API_ENDPOINT = "http://78.154.103.13:16831/imguikey";
 
 async function checkKeyApi(raw) {
   const response = await fetch(KEY_API_ENDPOINT, {
